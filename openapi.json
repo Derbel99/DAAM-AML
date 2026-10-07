@@ -1,0 +1,37 @@
+{
+  "openapi": "3.0.3",
+  "info": {"title": "AML Mock API", "version": "1.0.0", "description": "Identites fictives. isFlagged=true signifie une correspondance fictive, pas une conclusion juridique."},
+  "servers": [{"url": "http://localhost:8000", "description": "Local uniquement; utiliser votre URL HTTPS dans Salesforce"}],
+  "security": [{"ApiKey": []}],
+  "paths": {
+    "/health": {"get": {"operationId": "health", "security": [], "responses": {"200": {"description": "Service disponible"}}}},
+    "/v1/aml/screen": {
+      "post": {
+        "operationId": "screenClient",
+        "summary": "Verifier une personne contre une liste fictive",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Client"}, "example": {"firstName": "Alex", "lastName": "TestAlerte", "dateOfBirth": "1980-01-15"}}}},
+        "responses": {
+          "200": {"description": "Resultat du rapprochement fictif", "content": {"application/json": {"schema": {"type": "object", "required": ["isFlagged"], "properties": {"isFlagged": {"type": "boolean", "description": "true = correspondance fictive; false = aucune correspondance"}}}, "example": {"isFlagged": true}}}},
+          "400": {"$ref": "#/components/responses/Error"},
+          "401": {"$ref": "#/components/responses/Error"},
+          "404": {"$ref": "#/components/responses/Error"},
+          "408": {"$ref": "#/components/responses/Error"},
+          "413": {"$ref": "#/components/responses/Error"},
+          "415": {"$ref": "#/components/responses/Error"}
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {"ApiKey": {"type": "apiKey", "in": "header", "name": "X-API-Key"}},
+    "schemas": {
+      "Client": {"type": "object", "additionalProperties": false, "required": ["firstName", "lastName", "dateOfBirth"], "properties": {
+        "firstName": {"type": "string", "minLength": 1, "maxLength": 100},
+        "lastName": {"type": "string", "minLength": 1, "maxLength": 100},
+        "dateOfBirth": {"type": "string", "format": "date", "description": "YYYY-MM-DD, date valide non future"}
+      }},
+      "Error": {"type": "object", "required": ["error"], "properties": {"error": {"type": "string"}, "message": {"type": "string"}}}
+    },
+    "responses": {"Error": {"description": "Echec du controle. Ne jamais interpreter comme isFlagged=false.", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}}
+  }
+}
