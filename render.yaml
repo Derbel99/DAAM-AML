@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: daam-aml
+    runtime: python
+    plan: free
+    buildCommand: python -m unittest -v test_api.py
+    startCommand: python -u app.py
+    healthCheckPath: /health
+    autoDeployTrigger: "off"
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+      - key: AML_API_KEY
+        generateValue: true
